@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import ConversionTracker from '@/components/ConversionTracker'
 
 export const metadata: Metadata = {
   title: 'Vielen Dank für Ihre Anfrage | Zürich Nachhilfe',
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
 
 export default function Dankesseite() {
   return (
-    <div className="min-h-screen py-12">
+    <>
+      <ConversionTracker />
+      <div className="min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -142,5 +145,6 @@ export default function Dankesseite() {
         </div>
       </div>
     </div>
+    </>
   )
 }

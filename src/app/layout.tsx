@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Zürich Nachhilfe | Qualifizierte Tutoren für nachhaltigen Lernerfolg",
@@ -25,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className="antialiased">
+        <GoogleAnalytics />
         {children}
       </body>
     </html>

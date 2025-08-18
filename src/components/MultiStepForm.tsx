@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getStoredTrackingParams } from '@/lib/tracking'
 
 const klassenOptions = [
   '1. Klasse Primar',
@@ -122,14 +123,44 @@ export default function MultiStepForm() {
     setLoading(true)
     
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Get stored tracking parameters
+      const trackingData = getStoredTrackingParams();
       
-      // Redirect to thank you page
-      router.push('/dankesseite')
-    } catch {
-      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.')
-      setLoading(false)
+      // Prepare form data with tracking parameters
+      const submitData = {
+        ...form,
+        gclid: trackingData?.params?.gclid,
+        utm_source: trackingData?.params?.utm_source,
+        utm_medium: trackingData?.params?.utm_medium,
+        utm_campaign: trackingData?.params?.utm_campaign,
+        utm_term: trackingData?.params?.utm_term,
+        utm_content: trackingData?.params?.utm_content,
+      };
+      
+      // Send data to API endpoint
+      const response = await fetch('/api/submit-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submitData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Ein Fehler ist aufgetreten');
+      }
+
+      if (data.success) {
+        // Redirect to thank you page
+        router.push('/dankesseite');
+      } else {
+        throw new Error(data.error || 'Ein Fehler ist aufgetreten');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+      setLoading(false);
     }
   }
 
