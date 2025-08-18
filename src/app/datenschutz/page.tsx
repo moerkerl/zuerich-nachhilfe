@@ -11,19 +11,20 @@ export default function Datenschutz() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <nav className="container-width py-4">
-          <Link href="/" className="flex items-center space-x-3">
-            <Image
-              src="/images/logo/logo.png"
-              alt="Zürich Nachhilfe Logo"
-              width={40}
-              height={40}
-              className="rounded-lg"
-            />
-            <span className="text-xl font-bold text-slate-900">Zürich Nachhilfe</span>
-          </Link>
-        </nav>
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center py-4">
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/logo.svg" 
+                alt="Zürich Nachhilfe" 
+                width={240}
+                height={80}
+                className="h-20 w-auto"
+              />
+            </Link>
+          </div>
+        </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -180,6 +181,22 @@ export default function Datenschutz() {
           </p>
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-gray-50 py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-sm text-gray-600">
+            <p>&copy; 2024 Zürich Nachhilfe. Alle Rechte vorbehalten.</p>
+            <div className="mt-2 space-x-4">
+              <Link href="/datenschutz" className="hover:text-primary">Datenschutz</Link>
+              <Link href="/impressum" className="hover:text-primary">Impressum</Link>
+            </div>
+            <div className="mt-2 text-xs text-gray-500">
+              Ein Service der Bildungsinstitut Fokus AG
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

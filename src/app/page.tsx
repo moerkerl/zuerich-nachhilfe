@@ -77,36 +77,32 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navigation */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <nav className="container-width py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <Image
-                src="/images/logo/logo.png"
-                alt="Zürich Nachhilfe Logo"
-                width={40}
-                height={40}
-                className="rounded-lg"
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center md:justify-between py-4">
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/logo.svg" 
+                alt="Zürich Nachhilfe" 
+                width={240}
+                height={80}
+                className="h-20 w-auto"
               />
-              <span className="text-xl font-bold text-slate-900">Zürich Nachhilfe</span>
             </Link>
-            
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-slate-600 hover:text-primary transition-colors">
-                Home
-              </Link>
-              <Link href="/lehrer-finden" className="btn-primary text-sm px-6 py-3">
-                Jetzt Tutor finden
-              </Link>
-            </div>
+            <Link 
+              href="/lehrer-finden" 
+              className="border-2 border-primary text-primary px-6 py-2 rounded-lg hover:bg-indigo-50 transition-colors font-medium bg-white hidden md:block"
+            >
+              Jetzt Tutor finden
+            </Link>
           </div>
-        </nav>
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main>
         {/* Hero Section */}
         <LPHero
           title={
@@ -268,54 +264,19 @@ export default function Home() {
           </div>
         </section>
       </main>
-
+      
       {/* Footer */}
-      <footer className="bg-slate-900 text-white">
-        <div className="container-width py-12">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-3 mb-4">
-                <Image
-                  src="/images/logo/logo.png"
-                  alt="Zürich Nachhilfe Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-lg"
-                />
-                <span className="text-lg font-bold">Zürich Nachhilfe</span>
-              </div>
-              <p className="text-slate-300 mb-4">
-                Professionelle Nachhilfe in Zürich und Umgebung. Qualifizierte Tutoren für nachhaltigen Lernerfolg.
-              </p>
-              <p className="text-slate-400 text-sm">
-                Ein Service der Bildungsinstitut Fokus AG
-              </p>
+      <footer className="bg-gray-50 py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-sm text-gray-600">
+            <p>&copy; 2024 Zürich Nachhilfe. Alle Rechte vorbehalten.</p>
+            <div className="mt-2 space-x-4">
+              <Link href="/datenschutz" className="hover:text-primary">Datenschutz</Link>
+              <Link href="/impressum" className="hover:text-primary">Impressum</Link>
             </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Kontakt</h3>
-              <div className="space-y-2 text-slate-300">
-                <p>📞 078 314 62 65</p>
-                <p>✉️ dantico@fokus-nachhilfe.ch</p>
-                <p>📍 Staffelstr 8, 8045 Zürich</p>
-              </div>
+            <div className="mt-2 text-xs text-gray-500">
+              Ein Service der Bildungsinstitut Fokus AG
             </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Rechtliches</h3>
-              <div className="space-y-2">
-                <Link href="/impressum" className="block text-slate-300 hover:text-white transition-colors">
-                  Impressum
-                </Link>
-                <Link href="/datenschutz" className="block text-slate-300 hover:text-white transition-colors">
-                  Datenschutz
-                </Link>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 Zürich Nachhilfe - Alle Rechte vorbehalten</p>
           </div>
         </div>
       </footer>

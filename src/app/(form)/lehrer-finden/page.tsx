@@ -8,6 +8,8 @@ export const metadata: Metadata = {
 
 export default function LehrerFinden() {
   return (
-    <MultiStepForm />
+    <div className="py-12">
+      <MultiStepForm />
+    </div>
   )
 }

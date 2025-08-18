@@ -3,17 +3,45 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-interface FormData {
-  schueler: string
-  klasse: string
-  fach: string
-  plz: string
-  nachname: string
-  telefon: string
-  email: string
-}
+const klassenOptions = [
+  '1. Klasse Primar',
+  '2. Klasse Primar',
+  '3. Klasse Primar',
+  '4. Klasse Primar',
+  '5. Klasse Primar',
+  '6. Klasse Primar',
+  '1. Sek A',
+  '1. Sek B', 
+  '1. Sek C',
+  '2. Sek A',
+  '2. Sek B',
+  '2. Sek C',
+  '3. Sek A',
+  '3. Sek B',
+  '3. Sek C',
+  '1. Klasse Gymnasium',
+  '2. Klasse Gymnasium',
+  '3. Klasse Gymnasium',
+  '4. Klasse Gymnasium',
+  '5. Klasse Gymnasium',
+  '6. Klasse Gymnasium',
+  'Lehre',
+  'Studium',
+  'Berufsschule',
+  'Fachhochschule',
+  'Universität'
+]
 
-const initialFormData: FormData = {
+const nachhilfeBeispiele = [
+  'Mathematik',
+  'Französisch',
+  'Deutsch',
+  'Englisch',
+  'Hausaufgabenhilfe',
+  'Prüfungsvorbereitung'
+]
+
+const initialState = {
   schueler: '',
   klasse: '',
   fach: '',
@@ -23,304 +51,339 @@ const initialFormData: FormData = {
   email: ''
 }
 
-const steps = [
-  { id: 1, title: 'Wer braucht Nachhilfe?', field: 'schueler' },
-  { id: 2, title: 'In welcher Klasse/Stufe?', field: 'klasse' },
-  { id: 3, title: 'In welchem Fach?', field: 'fach' },
-  { id: 4, title: 'In welcher Region?', field: 'plz' },
-  { id: 5, title: 'Ihre Kontaktdaten', field: 'contact' }
-]
-
 export default function MultiStepForm() {
+  const [step, setStep] = useState(1)
+  const [form, setForm] = useState(initialState)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(1)
-  const [formData, setFormData] = useState<FormData>(initialFormData)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
 
-  const handleNext = () => {
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1)
+  const handleChangeWithAutoAdvance = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+    
+    // Auto-advance for class selection
+    if (name === 'klasse' && value && step === 2) {
+      setTimeout(() => {
+        setError('')
+        setStep(step + 1)
+      }, 300)
     }
+    
+    // Auto-advance for PLZ when 4 characters are entered
+    if (name === 'plz' && value.length === 4 && step === 4) {
+      setTimeout(() => {
+        setError('')
+        setStep(step + 1)
+      }, 300)
+    }
+  }
+
+  const handleSelectWithAutoAdvance = (name: string, value: string) => {
+    setForm({ ...form, [name]: value })
+    setTimeout(() => {
+      setError('')
+      setStep(step + 1)
+    }, 300)
+  }
+
+  const handleNext = (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setError('')
+    
+    // Validierung je Schritt
+    if (step === 1 && !form.schueler) return setError('Bitte wählen Sie eine Option.')
+    if (step === 2 && !form.klasse) return setError('Bitte wählen oder geben Sie eine Klasse an.')
+    if (step === 3 && !form.fach) return setError('Bitte geben Sie das Nachhilfefach an.')
+    if (step === 4 && !form.plz) return setError('Bitte geben Sie Ihre Postleitzahl an.')
+    
+    setStep(step + 1)
   }
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+    setError('')
+    setStep(step - 1)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    
+    // Validierung
+    if (!form.nachname || !form.telefon || !form.email) {
+      setError('Bitte füllen Sie alle Felder aus.')
+      return
     }
-  }
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true)
+    setLoading(true)
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Navigate to thank you page
-    router.push('/dankesseite')
-  }
-
-  const updateFormData = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const isStepValid = (step: number): boolean => {
-    switch (step) {
-      case 1: return formData.schueler !== ''
-      case 2: return formData.klasse !== ''
-      case 3: return formData.fach !== ''
-      case 4: return formData.plz !== ''
-      case 5: return formData.nachname !== '' && formData.telefon !== '' && formData.email !== ''
-      default: return false
+    try {
+      // Simulate form submission
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Redirect to thank you page
+      router.push('/dankesseite')
+    } catch {
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.')
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="max-w-2xl mx-auto px-4">
-        {/* Progress Bar */}
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+      {/* Progress indicator */}
+      {step <= 5 && (
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold ${
-                  step.id <= currentStep
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
-              >
-                {step.id}
-              </div>
-            ))}
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-primary font-semibold">Frage {step} von 5</div>
+            <div className="text-gray-500 text-sm">{Math.round((step / 5) * 100)}% abgeschlossen</div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full transition-all duration-500"
-              style={{ width: `${(currentStep / 5) * 100}%` }}
+            <div 
+              className="bg-primary h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(step / 5) * 100}%` }}
             />
           </div>
         </div>
+      )}
 
-        {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-center mb-8 text-slate-900">
-            {steps[currentStep - 1].title}
+      {/* Step 1: Wer braucht Nachhilfe */}
+      {step === 1 && (
+        <form onSubmit={handleNext}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            Wer braucht Nachhilfe?
           </h2>
-
-          {/* Step 1: Wer braucht Nachhilfe? */}
-          {currentStep === 1 && (
-            <div className="space-y-4">
-              {[
-                { value: 'meine-tochter', label: 'Meine Tochter' },
-                { value: 'mein-sohn', label: 'Mein Sohn' },
-                { value: 'ich', label: 'Ich selbst' },
-                { value: 'jemand-anderes', label: 'Jemand anderes' }
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    updateFormData('schueler', option.value)
-                    setTimeout(handleNext, 300)
-                  }}
-                  className={`w-full p-4 rounded-lg border-2 transition-all ${
-                    formData.schueler === option.value
-                      ? 'border-primary bg-indigo-50 text-primary'
-                      : 'border-gray-200 hover:border-primary hover:bg-indigo-50'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Step 2: Klasse/Stufe */}
-          {currentStep === 2 && (
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                'Primarschule (1.-6.)',
-                'Sekundarstufe I (7.-9.)',
-                'Gymnasium/Mittelschule',
-                'Berufsschule/Lehre',
-                'Fachhochschule',
-                'Universität',
-                'Erwachsenenbildung',
-                'Andere'
-              ].map((option) => (
-                <button
-                  key={option}
-                  onClick={() => {
-                    updateFormData('klasse', option)
-                    setTimeout(handleNext, 300)
-                  }}
-                  className={`p-4 rounded-lg border-2 transition-all text-sm ${
-                    formData.klasse === option
-                      ? 'border-primary bg-indigo-50 text-primary'
-                      : 'border-gray-200 hover:border-primary hover:bg-indigo-50'
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Step 3: Fach */}
-          {currentStep === 3 && (
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                'Mathematik',
-                'Deutsch',
-                'Englisch',
-                'Französisch',
-                'Physik',
-                'Chemie',
-                'Biologie',
-                'Geschichte',
-                'Geographie',
-                'Italienisch',
-                'Latein',
-                'Andere'
-              ].map((option) => (
-                <button
-                  key={option}
-                  onClick={() => {
-                    updateFormData('fach', option)
-                    setTimeout(handleNext, 300)
-                  }}
-                  className={`p-4 rounded-lg border-2 transition-all text-sm ${
-                    formData.fach === option
-                      ? 'border-primary bg-indigo-50 text-primary'
-                      : 'border-gray-200 hover:border-primary hover:bg-indigo-50'
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Step 4: PLZ */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <div>
-                <label htmlFor="plz" className="block text-sm font-medium text-gray-700 mb-2">
-                  Postleitzahl
-                </label>
-                <input
-                  type="text"
-                  id="plz"
-                  value={formData.plz}
-                  onChange={(e) => updateFormData('plz', e.target.value)}
-                  placeholder="z.B. 8001"
-                  className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-primary focus:ring-0 outline-none"
-                  maxLength={4}
-                />
-              </div>
+          <div className="grid grid-cols-1 gap-3 mb-6">
+            {['Meine Tochter', 'Mein Sohn', 'Ich', 'Jemand anderes'].map((option, index) => (
               <button
-                onClick={handleNext}
-                disabled={!isStepValid(4)}
-                className={`w-full p-4 rounded-lg font-semibold transition-all ${
-                  isStepValid(4)
-                    ? 'btn-primary'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                key={index}
+                type="button"
+                className={`border-2 rounded-lg px-6 py-4 text-left transition-all font-medium cursor-pointer ${
+                  form.schueler === option.toLowerCase().replace(' ', '-')
+                    ? 'border-primary bg-indigo-50 text-primary'
+                    : 'border-gray-300 hover:border-primary text-gray-700'
                 }`}
+                onClick={() => handleSelectWithAutoAdvance('schueler', option.toLowerCase().replace(' ', '-'))}
               >
-                Weiter
+                {option}
               </button>
-            </div>
-          )}
+            ))}
+          </div>
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          <div className="flex justify-between mt-8">
+            <div />
+            <button 
+              type="submit" 
+              className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors font-semibold cursor-pointer"
+            >
+              Weiter
+            </button>
+          </div>
+        </form>
+      )}
 
-          {/* Step 5: Kontaktdaten */}
-          {currentStep === 5 && (
-            <div className="space-y-6">
-              <div>
-                <label htmlFor="nachname" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nachname *
-                </label>
-                <input
-                  type="text"
-                  id="nachname"
-                  value={formData.nachname}
-                  onChange={(e) => updateFormData('nachname', e.target.value)}
-                  className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-primary focus:ring-0 outline-none"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="telefon" className="block text-sm font-medium text-gray-700 mb-2">
-                  Telefonnummer *
-                </label>
-                <input
-                  type="tel"
-                  id="telefon"
-                  value={formData.telefon}
-                  onChange={(e) => updateFormData('telefon', e.target.value)}
-                  className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-primary focus:ring-0 outline-none"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  E-Mail-Adresse *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={(e) => updateFormData('email', e.target.value)}
-                  className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-primary focus:ring-0 outline-none"
-                />
-              </div>
-              
-              <button
-                onClick={handleSubmit}
-                disabled={!isStepValid(5) || isSubmitting}
-                className={`w-full p-4 rounded-lg font-semibold transition-all ${
-                  isStepValid(5) && !isSubmitting
-                    ? 'btn-primary'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                    <span>Wird gesendet...</span>
-                  </div>
-                ) : (
-                  'Anfrage senden'
-                )}
-              </button>
-            </div>
-          )}
+      {/* Step 2: Klasse */}
+      {step === 2 && (
+        <form onSubmit={handleNext}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            In welcher Klasse ist {
+              form.schueler === 'meine-tochter' ? 'Ihre Tochter' : 
+              form.schueler === 'mein-sohn' ? 'Ihr Sohn' : 
+              form.schueler === 'ich' ? 'Sie' : 'die Person'
+            }?
+          </h2>
+          <select 
+            name="klasse" 
+            value={form.klasse} 
+            onChange={handleChangeWithAutoAdvance}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-gray-700"
+          >
+            <option value="">Bitte wählen...</option>
+            {klassenOptions.map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+          {error && <div className="text-red-500 mt-2">{error}</div>}
+          <div className="flex justify-between mt-8">
+            <button 
+              type="button" 
+              className="text-primary hover:text-primary-600 font-medium cursor-pointer"
+              onClick={handleBack}
+            >
+              ← Zurück
+            </button>
+            <button 
+              type="submit" 
+              className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors font-semibold cursor-pointer"
+            >
+              Weiter
+            </button>
+          </div>
+        </form>
+      )}
 
-          {/* Navigation */}
-          {currentStep > 1 && currentStep < 5 && (
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={handleBack}
-                className="btn-secondary"
-              >
-                Zurück
-              </button>
-              
-              {currentStep < 4 && (
+      {/* Step 3: Fach */}
+      {step === 3 && (
+        <form onSubmit={handleNext}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            Was für Nachhilfe wird benötigt?
+          </h2>
+          
+          <input 
+            name="fach" 
+            value={form.fach} 
+            onChange={handleChange}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-gray-700 mb-4"
+            placeholder="Fach eingeben..."
+          />
+          
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-3">Oder wählen Sie aus beliebten Optionen:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {nachhilfeBeispiele.map(fach => (
                 <button
-                  onClick={handleNext}
-                  disabled={!isStepValid(currentStep)}
-                  className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-                    isStepValid(currentStep)
-                      ? 'btn-primary'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  key={fach}
+                  type="button"
+                  className={`border-2 rounded-lg px-4 py-2 text-sm transition-all cursor-pointer ${
+                    form.fach === fach
+                      ? 'border-primary bg-indigo-50 text-primary'
+                      : 'border-gray-300 hover:border-primary text-gray-700'
                   }`}
+                  onClick={() => setForm({ ...form, fach })}
                 >
-                  Weiter
+                  {fach}
                 </button>
-              )}
+              ))}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+
+          {error && <div className="text-red-500 mt-2">{error}</div>}
+          <div className="flex justify-between mt-8">
+            <button 
+              type="button" 
+              className="text-primary hover:text-primary-600 font-medium cursor-pointer"
+              onClick={handleBack}
+            >
+              ← Zurück
+            </button>
+            <button 
+              type="submit" 
+              className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors font-semibold cursor-pointer"
+            >
+              Weiter
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Step 4: PLZ */}
+      {step === 4 && (
+        <form onSubmit={handleNext}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            Wo wohnen Sie?
+          </h2>
+          <label className="block text-gray-700 mb-2">Postleitzahl</label>
+          <input 
+            name="plz" 
+            value={form.plz} 
+            onChange={handleChangeWithAutoAdvance}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-gray-700"
+            placeholder="PLZ eingeben..."
+            maxLength={4}
+          />
+          {error && <div className="text-red-500 mt-2">{error}</div>}
+          <div className="flex justify-between mt-8">
+            <button 
+              type="button" 
+              className="text-primary hover:text-primary-600 font-medium cursor-pointer"
+              onClick={handleBack}
+            >
+              ← Zurück
+            </button>
+            <button 
+              type="submit" 
+              className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors font-semibold cursor-pointer"
+            >
+              Weiter
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Step 5: Kontaktdaten */}
+      {step === 5 && (
+        <form onSubmit={handleSubmit}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            Ihre Kontaktdaten
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Damit wir Ihnen die passende Auswahl an Nachhilfelehrern in Zürich zusenden können.
+          </p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-2">Nachname *</label>
+              <input 
+                name="nachname" 
+                value={form.nachname} 
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-gray-700"
+                placeholder="Ihr Nachname"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 mb-2">Telefonnummer *</label>
+              <input 
+                name="telefon" 
+                value={form.telefon} 
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-gray-700"
+                placeholder="+41 79 XXX XX XX"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 mb-2">E-Mail *</label>
+              <input 
+                name="email" 
+                value={form.email} 
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-gray-700"
+                placeholder="ihre@email.ch"
+                type="email"
+                required
+              />
+            </div>
+          </div>
+
+          {error && <div className="text-red-500 mt-4">{error}</div>}
+          
+          <div className="flex justify-between mt-8">
+            <button 
+              type="button" 
+              className="text-primary hover:text-primary-600 font-medium cursor-pointer"
+              onClick={handleBack}
+              disabled={loading}
+            >
+              ← Zurück
+            </button>
+            <button 
+              type="submit" 
+              className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors font-semibold disabled:opacity-50 cursor-pointer"
+              disabled={loading}
+            >
+              {loading ? 'Wird gesendet...' : 'Anfrage senden'}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   )
 }
