@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Impressum | Zürich Nachhilfe',
@@ -14,14 +13,9 @@ export default function Impressum() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-4">
-            <Link href="/" className="flex items-center">
-              <Image 
-                src="/logo.svg" 
-                alt="Zürich Nachhilfe" 
-                width={240}
-                height={80}
-                className="h-20 w-auto"
-              />
+            <Link href="/" className="flex flex-col items-center">
+              <h1 className="text-2xl font-bold text-primary">Zürich Nachhilfe</h1>
+              <p className="text-sm text-gray-600 -mt-1">Qualifizierte Nachhilfe in Zürich</p>
             </Link>
           </div>
         </div>
