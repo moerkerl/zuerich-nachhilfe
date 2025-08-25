@@ -30,7 +30,8 @@ const klassenOptions = [
   'Studium',
   'Berufsschule',
   'Fachhochschule',
-  'Universität'
+  'Universität',
+  'Sonstiges'
 ]
 
 const nachhilfeBeispiele = [
